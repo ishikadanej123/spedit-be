@@ -1,8 +1,8 @@
-import {defineType, defineField} from 'sanity'
+import {defineField, defineType} from 'sanity'
 
-export const heroBanner = defineType({
-  name: 'heroBanner',
-  title: 'Hero Banner',
+export const promoBannerType = defineType({
+  name: 'promoBanner',
+  title: 'Promo Banner',
   type: 'document',
   fields: [
     defineField({
@@ -11,28 +11,18 @@ export const heroBanner = defineType({
       type: 'string',
     }),
     defineField({
-      name: 'slides',
-      title: 'Slides',
+      name: 'banners',
+      title: 'Banners',
       type: 'array',
       of: [
         {
           type: 'object',
-          name: 'slide',
-          title: 'Slide',
+          name: 'banner',
+          title: 'Banner',
           fields: [
             defineField({
-              name: 'label',
-              title: 'Label (e.g. Hot, New)',
-              type: 'string',
-            }),
-            defineField({
-              name: 'discount',
-              title: 'Discount (e.g. -28%)',
-              type: 'string',
-            }),
-            defineField({
               name: 'title',
-              title: 'Main Title',
+              title: 'Title',
               type: 'string',
               validation: (rule) => rule.required(),
             }),
@@ -40,25 +30,23 @@ export const heroBanner = defineType({
               name: 'subtitle',
               title: 'Subtitle',
               type: 'string',
+              validation: (rule) => rule.required(),
             }),
             defineField({
-              name: 'description',
-              title: 'Description',
-              type: 'text',
-            }),
-            defineField({
-              name: 'ctaText',
-              title: 'CTA Button Text',
+              name: 'buttonText',
+              title: 'Button Text',
               type: 'string',
+              initialValue: 'Buy Now',
+              validation: (rule) => rule.required(),
             }),
             defineField({
-              name: 'ctaLink',
-              title: 'CTA Link URL',
+              name: 'buttonLink',
+              title: 'Button Link',
               type: 'url',
             }),
             defineField({
               name: 'image',
-              title: 'Slide Image',
+              title: 'Banner Image',
               type: 'image',
               options: {
                 hotspot: true,
@@ -69,12 +57,12 @@ export const heroBanner = defineType({
               name: 'backgroundColor',
               title: 'Background Color',
               type: 'string',
-              description: 'Optional (hex code or Tailwind class name)',
+              description: 'Optional hex or Tailwind class (e.g. #f2f2f2 or bg-blue-100)',
             }),
           ],
         },
       ],
-      validation: (rule) => rule.min(1).max(4).error('You must have between 1 and 4 slides.'),
+      validation: (rule) => rule.min(1).error('At least one banner is required.'),
     }),
   ],
 })
