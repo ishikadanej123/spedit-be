@@ -12,7 +12,7 @@ export const promoProductSection = defineType({
     }),
     defineField({
       name: 'products',
-      title: 'Products',
+      title: 'Promo Products',
       type: 'array',
       of: [
         {

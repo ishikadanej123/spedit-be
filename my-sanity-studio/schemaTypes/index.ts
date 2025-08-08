@@ -5,6 +5,8 @@ import {promoBannerType} from './Homepage/promobanner'
 import {promoProductSection} from './Homepage/promoProductSection'
 import {dealOfTheDayBanner} from './Homepage/dealOfTheDayBanner'
 import {promoSection} from './Homepage/promoSection'
+import {categoryType} from './Products/category'
+import {productType} from './Products/products'
 
 export const schemaTypes = [
   heroBanner,
@@ -14,4 +16,6 @@ export const schemaTypes = [
   promoProductSection,
   dealOfTheDayBanner,
   promoSection,
+  productType,
+  categoryType,
 ]
