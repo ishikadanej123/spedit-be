@@ -11,5 +11,6 @@ export const pageSections = defineType({
     {type: 'dealOfTheDayBanner'},
     {type: 'promoSection'},
     {type: 'product'},
+    {type: 'sellingBanner'},
   ],
 })

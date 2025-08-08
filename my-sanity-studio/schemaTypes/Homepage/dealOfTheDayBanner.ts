@@ -7,7 +7,7 @@ export const dealOfTheDayBanner = defineType({
   fields: [
     defineField({
       name: 'title',
-      title: 'Title',
+      title: 'Banner Title',
       type: 'string',
       validation: (rule) => rule.required(),
     }),
@@ -29,14 +29,14 @@ export const dealOfTheDayBanner = defineType({
       description: 'e.g. Hot',
     }),
     defineField({
-      name: 'ctaText',
-      title: 'CTA Button Text',
+      name: 'buttonText',
+      title: 'Button Text',
       type: 'string',
       initialValue: 'Deal of the Day',
     }),
     defineField({
-      name: 'ctaLink',
-      title: 'CTA Button Link',
+      name: 'buttonLink',
+      title: 'Button Link',
       type: 'string',
       description: 'Internal route like /shop or /product/[slug]',
     }),
@@ -47,8 +47,8 @@ export const dealOfTheDayBanner = defineType({
       //   validation: (rule) => rule.required(),
     }),
     defineField({
-      name: 'backgroundImage',
-      title: 'Background Image',
+      name: 'image',
+      title: 'Banner Image',
       type: 'image',
       options: {
         hotspot: true,

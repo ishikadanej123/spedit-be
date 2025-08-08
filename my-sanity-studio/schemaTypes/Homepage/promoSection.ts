@@ -7,7 +7,7 @@ export const promoSection = defineType({
   fields: [
     defineField({
       name: 'title',
-      title: 'Title',
+      title: 'Banner Title',
       type: 'string',
       validation: (rule) => rule.required(),
       description: 'Main heading (e.g., Grade A Safety Masks)',
@@ -63,14 +63,14 @@ export const promoSection = defineType({
       validation: (rule) => rule.min(1).max(4),
     }),
     defineField({
-      name: 'ctaText',
-      title: 'CTA Button Text',
+      name: 'buttonText',
+      title: 'Button Text',
       type: 'string',
-      initialValue: '  Discover More',
+      initialValue: 'Discover More',
     }),
     defineField({
-      name: 'discoverMoreLink',
-      title: 'Discover More Link',
+      name: 'buttonLink',
+      title: 'Button Link',
       type: 'url',
       description: 'URL for the Discover More button',
       validation: (rule) =>
@@ -79,8 +79,8 @@ export const promoSection = defineType({
         }),
     }),
     defineField({
-      name: 'backgroundImage',
-      title: 'Background Image',
+      name: 'image',
+      title: 'Banner Image',
       type: 'image',
       options: {
         hotspot: true,
