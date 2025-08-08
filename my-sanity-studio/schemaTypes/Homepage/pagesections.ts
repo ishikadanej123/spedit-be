@@ -4,5 +4,5 @@ export const pageSections = defineType({
   name: 'pageSections',
   title: 'Page Sections',
   type: 'array',
-  of: [{type: 'heroBanner'}, {type: 'promoBanner'}],
+  of: [{type: 'heroBanner'}, {type: 'promoBanner'}, {type: 'promoProductSection'}],
 })
