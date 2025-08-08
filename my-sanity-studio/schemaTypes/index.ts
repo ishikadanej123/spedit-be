@@ -3,6 +3,8 @@ import {homePage} from './Homepage/homepage'
 import {pageSections} from './Homepage/pagesections'
 import {promoBannerType} from './Homepage/promobanner'
 import {promoProductSection} from './Homepage/promoProductSection'
+import {dealOfTheDayBanner} from './Homepage/dealOfTheDayBanner'
+import {promoSection} from './Homepage/promoSection'
 
 export const schemaTypes = [
   heroBanner,
@@ -10,4 +12,6 @@ export const schemaTypes = [
   homePage,
   pageSections,
   promoProductSection,
+  dealOfTheDayBanner,
+  promoSection,
 ]
