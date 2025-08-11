@@ -1,4 +1,5 @@
 import {defineField, defineType} from 'sanity'
+import {v4 as uuidv4} from 'uuid'
 
 export const productType = defineType({
   name: 'product',
@@ -20,6 +21,13 @@ export const productType = defineType({
           name: 'productCard',
           title: 'Product Card',
           fields: [
+            defineField({
+              name: 'id',
+              title: 'Product ID',
+              type: 'string',
+              initialValue: () => uuidv4(),
+              readOnly: true,
+            }),
             defineField({
               name: 'title',
               title: 'Product Title',
@@ -124,7 +132,6 @@ export const productType = defineType({
                   to: [{type: 'category'}],
                 },
               ],
-              //   validation: (rule) => rule.required().min(1),
             }),
             defineField({
               name: 'isTrending',
