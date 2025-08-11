@@ -4,7 +4,7 @@ import {v4 as uuidv4} from 'uuid'
 export const productType = defineType({
   name: 'product',
   title: 'Product',
-  type: 'object',
+  type: 'document',
   fields: [
     defineField({
       name: 'sectionTitle',

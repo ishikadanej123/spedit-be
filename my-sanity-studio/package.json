@@ -19,12 +19,8 @@
     "react": "^19.1",
     "react-dom": "^19.1",
     "sanity": "^4.3.0",
-<<<<<<< Updated upstream
-    "styled-components": "^6.1.18"
-=======
     "styled-components": "^6.1.18",
     "uuid": "^11.1.0"
->>>>>>> Stashed changes
   },
   "devDependencies": {
     "@sanity/eslint-config-studio": "^5.0.2",
