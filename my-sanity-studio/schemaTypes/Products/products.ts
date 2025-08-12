@@ -123,15 +123,13 @@ export const productType = defineType({
               ],
             }),
             defineField({
-              name: 'categories',
-              title: 'Product Categories',
-              type: 'array',
-              of: [
-                {
-                  type: 'reference',
-                  to: [{type: 'category'}],
-                },
-              ],
+              name: 'category',
+              title: 'Product Category',
+              type: 'reference',
+              to: [{type: 'category'}],
+              options: {
+                disableNew: true,
+              },
             }),
             defineField({
               name: 'isTrending',
