@@ -52,7 +52,23 @@ export const productType = defineType({
               name: 'details',
               title: 'Product Details',
               type: 'array',
-              of: [{type: 'block'}],
+              of: [
+                {
+                  type: 'block',
+                },
+                {
+                  type: 'image',
+                  options: {hotspot: true},
+                  fields: [
+                    {
+                      name: 'alt',
+                      type: 'string',
+                      title: 'Alternative text',
+                      description: 'Important for SEO and accessibility.',
+                    },
+                  ],
+                },
+              ],
             }),
             defineField({
               name: 'price',
