@@ -4,6 +4,7 @@ require("dotenv").config();
 
 const app = express();
 const authroutes = require("./routes/auth.route");
+const cartroutes = require("./routes/cart.route");
 const PORT = process.env.APP_PORT || 4000;
 app.use(cors());
 app.use(express.json());
@@ -19,6 +20,7 @@ app.get("/", async (req, res) => {
 });
 
 app.use("/", authroutes);
+app.use("/cart", cartroutes);
 
 app.listen(PORT, () => {
   console.log(`Server is running on http://localhost:${PORT}`);
