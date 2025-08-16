@@ -1,21 +1,17 @@
 const express = require("express");
 const { Cart, User } = require("../models");
+const authMiddleware = require("../middleware/authMiddleware");
 
 const router = express.Router();
 
-router.post("/add-to-cart", async (req, res) => {
-  const {
-    userId,
-    productId,
-    productImage,
-    quantity,
-    size,
-    productName,
-    price,
-  } = req.body;
+router.post("/add-to-cart", authMiddleware, async (req, res) => {
+  const { productId, productImage, quantity, size, productName, price } =
+    req.body;
 
   try {
+    const userId = req.user.userId;
     const user = await User.findByPk(userId);
+
     if (!user) {
       return res.status(404).json({ message: "User not found" });
     }
@@ -55,24 +51,50 @@ router.get("/:userId", async (req, res) => {
   const { userId } = req.params;
 
   try {
-    const cartItems = await Cart.findAll({
-      where: { userId },
-      include: [
-        {
-          model: Product,
-          attributes: ["id", "name", "price", "imageUrl"],
-        },
-      ],
-    });
+    // Fetch cart items from DB
+    const cartItems = await Cart.findAll({ where: { userId: userId } });
 
-    if (!cartItems || cartItems.length === 0) {
-      return res.status(404).json({ message: "No items found in cart" });
+    if (!cartItems.length) {
+      return res.status(200).json({ message: "Cart is empty", cart: [] });
     }
 
-    res.status(200).json({ userId, cart: cartItems });
+    const productIds = cartItems.map((item) => item.product_id);
+
+    console.log("productss>>>>>>>---------------", productIds);
+    const sanityQuery = `*[_type == "product" && _id in ${JSON.stringify(
+      productIds
+    )}]{
+      _id,
+      title,
+      price,
+      "imageUrl": image.asset->url
+    }`;
+
+    const sanityResponse = await fetch(
+      `https://${
+        process.env.SANITY_PROJECT_ID
+      }.api.sanity.io/v2021-10-21/data/query/${
+        process.env.SANITY_DATASET
+      }?query=${encodeURIComponent(sanityQuery)}`
+    ).then((res) => res.json());
+
+    const productMap = {};
+    sanityResponse.result.forEach((p) => {
+      productMap[p._id] = p;
+    });
+
+    // Merge DB cart + Sanity product info
+    const response = cartItems.map((item) => ({
+      id: item.id,
+      quantity: item.quantity,
+      price: item.price,
+      product: productMap[item.product_id] || null,
+    }));
+
+    res.status(200).json(response);
   } catch (error) {
-    console.error("Error fetching cart:", error);
-    res.status(500).json({ message: "Error fetching cart", error });
+    console.error(error);
+    res.status(500).json({ message: "Error fetching cart" });
   }
 });
 
