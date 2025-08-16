@@ -2,23 +2,21 @@ const jwt = require("jsonwebtoken");
 
 const authMiddleware = (req, res, next) => {
   const authHeader = req.headers["authorization"];
-  console.log("Authorization Header:", authHeader); // 🔍 debug
-
-  if (!authHeader || !authHeader.startsWith("Bearer ")) {
+  if (!authHeader) {
     return res.status(401).json({ message: "No token provided" });
   }
 
-  const token = authHeader.split(" ")[1];
-  console.log("Extracted Token:", token); // 🔍 debug
+  const token = authHeader.split(" ")[1]; // Bearer <token>
+  if (!token) {
+    return res.status(401).json({ message: "Invalid token format" });
+  }
 
   try {
     const decoded = jwt.verify(token, process.env.JWT_SECRET);
-    console.log("Decoded JWT:", decoded); // 🔍 debug
-    req.user = decoded;
+    req.user = decoded; // { id, name, email }
     next();
   } catch (err) {
-    console.error("JWT Verify Error:", err.message); // 🔍 debug
-    return res.status(403).json({ message: "Invalid token" });
+    return res.status(403).json({ message: "Invalid or expired token" });
   }
 };
 
