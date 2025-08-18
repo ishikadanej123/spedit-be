@@ -34,7 +34,7 @@ const PRODUCTS_FLAT = groq`*[_type == "product"].products[]{
     }
   },
   price,
-  originalPrice,
+    "originalPrice": select(defined(originalPrice) => originalPrice, defined(origianlprice) => origianlprice),
   inStock,
   sku,
   images[]{
