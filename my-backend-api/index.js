@@ -1,6 +1,7 @@
 const express = require("express");
 const cors = require("cors");
 require("dotenv").config();
+const { sanity, PRODUCTS_FLAT } = require("./lib/sanity");
 
 const app = express();
 const authroutes = require("./routes/auth.route");
@@ -14,6 +15,16 @@ app.listen(PORT, () => {
   console.log(`Server running on http://localhost:${PORT}`);
 });
 
+app.get("/api/products", async (_req, res) => {
+  try {
+    const data = await sanity.fetch(PRODUCTS_FLAT);
+    return res.json(data);
+  } catch (error) {
+    console.error("Error fetching products from Sanity:", error);
+    res.status(500).json({ error: "Failed to fetch products" });
+  }
+});
+
 app.get("/", async (req, res) => {
   console.log("GET / called");
   res.status(200).send("hello world");
@@ -21,7 +32,3 @@ app.get("/", async (req, res) => {
 
 app.use("/", authroutes);
 app.use("/cart", cartroutes);
-
-app.listen(PORT, () => {
-  console.log(`Server is running on http://localhost:${PORT}`);
-});
