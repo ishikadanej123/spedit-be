@@ -32,7 +32,6 @@ const addToCart = async (req, res) => {
 
     const actualPriceRaw = product.price ?? product.originalPrice;
     const actualPrice = Number(actualPriceRaw);
-    console.log("actualprice>>>>>>>--", actualPrice);
 
     if (!Number.isFinite(actualPrice) || actualPrice <= 0) {
       return res.status(400).json({
@@ -125,8 +124,37 @@ const getCart = async (req, res) => {
     res.status(500).json({ message: "Error fetching cart" });
   }
 };
+const removeFromCart = async (req, res) => {
+  try {
+    const userId = req.user.id;
+    const { productId } = req.params;
+
+    if (!productId) {
+      return res.status(400).json({ message: "Product ID is required" });
+    }
+
+    const cartItem = await Cart.findOne({
+      where: { userId, productId },
+    });
+
+    if (!cartItem) {
+      return res.status(404).json({ message: "Product not found in cart" });
+    }
+
+    await cartItem.destroy();
+
+    return res.status(200).json({
+      success: true,
+      message: "Product removed from cart successfully",
+    });
+  } catch (err) {
+    console.error("Error removing product from cart:", err);
+    return res.status(500).json({ message: "Internal server error" });
+  }
+};
 
 module.exports = {
   addToCart,
   getCart,
+  removeFromCart,
 };
