@@ -30,7 +30,7 @@ const addToWishlist = async (req, res) => {
       }`,
       { pid: productId }
     );
-    console.log("sanityproduct>>>>>>>>>>>>>>>", sanityProduct);
+
     if (!sanityProduct) {
       return res.status(404).json({ message: "Product not found in Sanity" });
     }

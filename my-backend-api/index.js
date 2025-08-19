@@ -7,6 +7,8 @@ const app = express();
 const authroutes = require("./routes/auth.route");
 const cartroutes = require("./routes/cart.route");
 const wishlistroutes = require("./routes/wishlist.route");
+const recentviewsroutes = require("./routes/recentview.route");
+
 const PORT = process.env.APP_PORT || 4000;
 app.use(cors());
 app.use(express.json());
@@ -34,3 +36,4 @@ app.get("/", async (req, res) => {
 app.use("/", authroutes);
 app.use("/cart", cartroutes);
 app.use("/wishlist", wishlistroutes);
+app.use("/recent-view", recentviewsroutes);
