@@ -7,9 +7,8 @@ const addRecentView = async (req, res) => {
 
   try {
     const userId = req.user.id;
-    if (!userId) {
-      return res.status(401).json({ message: "Unauthorized" });
-    }
+    if (!userId) return res.status(401).json({ message: "Unauthorized" });
+
     await RecentView.destroy({ where: { userId, productId } });
 
     await RecentView.create({ userId, productId });
@@ -21,21 +20,19 @@ const addRecentView = async (req, res) => {
       attributes: ["productId"],
     });
 
-    const productIds = recentViews.map((rv) => rv.productId);
+    const productIds = [...new Set(recentViews.map((rv) => rv.productId))];
 
     const sanityQuery = groq`
-        *[_type == "product"]{
-            products[coalesce(id, _key) in $ids]{
-            title,
-            price,
-            "resolvedId": coalesce(id, _key),
-            "parentDocId": ^._id,
-            "imageUrl": images[0].asset->url
-            }
-        }[].products[]
-        `;
+      *[_type == "product" && coalesce(id, _key) in $ids]{
+        title,
+        price,
+        "resolvedId": coalesce(id, _key),
+        "imageUrl": images[0].asset->url
+      }
+    `;
 
     const products = await sanity.fetch(sanityQuery, { ids: productIds });
+
     const orderedProducts = productIds.map((id) =>
       products.find((p) => p.resolvedId === id)
     );
@@ -81,9 +78,17 @@ const getRecentViews = async (req, res) => {
 
     const products = await sanity.fetch(sanityQuery, { ids: productIds });
 
-    const orderedProducts = productIds.map((id) =>
+    let orderedProducts = productIds.map((id) =>
       products.find((p) => p.resolvedId === id)
     );
+
+    const seen = new Set();
+    orderedProducts = orderedProducts.filter((product) => {
+      if (!product) return false;
+      if (seen.has(product.resolvedId)) return false;
+      seen.add(product.resolvedId);
+      return true;
+    });
 
     res.status(200).json(orderedProducts);
   } catch (err) {
@@ -92,4 +97,17 @@ const getRecentViews = async (req, res) => {
   }
 };
 
-module.exports = { addRecentView, getRecentViews };
+const cleanArray = async (req, res) => {
+  try {
+    const userId = req.user.id;
+    await RecentView.destroy({ where: { userId } });
+    return res
+      .status(200)
+      .json({ message: "Recent views cleared successfully" });
+  } catch (err) {
+    console.error("Error clearing recent views:", error);
+    return res.status(500).json({ error: "Failed to clear recent views" });
+  }
+};
+
+module.exports = { addRecentView, getRecentViews, cleanArray };

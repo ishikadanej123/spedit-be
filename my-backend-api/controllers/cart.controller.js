@@ -8,11 +8,6 @@ const addToCart = async (req, res) => {
     const userId = req.user.id;
     const user = await User.findByPk(userId);
     if (!user) return res.status(404).json({ message: "User not found" });
-    if (!quantity || quantity <= 0) {
-      return res
-        .status(400)
-        .json({ message: "Quantity must be greater than 0" });
-    }
 
     const sanityProduct = await sanity.fetch(
       groq`*[_type == "product"].products[coalesce(id, _key) == $pid][0]{
@@ -100,7 +95,18 @@ const getCart = async (req, res) => {
 
     const response = cartItems.map((item) => {
       const product = productMap[item.productId] || null;
+      let imageUrl = null;
+      if (product) {
+        const matchedSize = product.sizes?.find(
+          (s) => s.title.toLowerCase() === item.size?.toLowerCase()
+        );
 
+        if (matchedSize?.images?.length > 0) {
+          imageUrl = matchedSize.images[0].asset.url;
+        } else {
+          imageUrl = product.imageUrl;
+        }
+      }
       return {
         id: item.id,
         quantity: item.quantity,
@@ -112,7 +118,7 @@ const getCart = async (req, res) => {
               id: product.resolvedId,
               title: product.title,
               price: product.price ?? product.originalPrice,
-              imageUrl: product.imageUrl,
+              imageUrl: imageUrl || "",
             }
           : null,
       };

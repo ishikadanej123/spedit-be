@@ -16,6 +16,10 @@ module.exports = (sequelize, DataTypes) => {
         type: DataTypes.STRING,
         allowNull: false,
       },
+      lastName: {
+        type: DataTypes.STRING,
+        allowNull: true,
+      },
       email: {
         type: DataTypes.STRING,
         allowNull: false,
@@ -24,9 +28,27 @@ module.exports = (sequelize, DataTypes) => {
           isEmail: true,
         },
       },
+      phone: {
+        type: DataTypes.STRING,
+        allowNull: true,
+        validate: {
+          is: /^[0-9+\-() ]+$/i,
+        },
+      },
       password: {
         type: DataTypes.STRING,
         allowNull: false,
+      },
+      addresses: {
+        type: DataTypes.JSON,
+        allowNull: true,
+        validate: {
+          isValidAddresses(value) {
+            if (value && typeof value !== "object") {
+              throw new Error("Addresses must be a valid JSON object");
+            }
+          },
+        },
       },
     },
     {

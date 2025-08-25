@@ -8,11 +8,6 @@ const addToWishlist = async (req, res) => {
     if (!productId) {
       return res.status(400).json({ message: "productId is required" });
     }
-    if (!quantity || quantity <= 0) {
-      return res
-        .status(400)
-        .json({ message: "Quantity must be greater than 0" });
-    }
 
     const userId = req.user?.id;
     if (!userId) {

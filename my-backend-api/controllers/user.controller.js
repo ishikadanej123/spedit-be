@@ -81,7 +81,16 @@ const users = async (req, res) => {
 const me = async (req, res) => {
   try {
     const user = await User.findByPk(req.user.id, {
-      attributes: ["id", "name", "email", "createdAt", "updatedAt"],
+      attributes: [
+        "id",
+        "name",
+        "lastName",
+        "phone",
+        "addresses",
+        "email",
+        "createdAt",
+        "updatedAt",
+      ],
     });
 
     if (!user) {
@@ -95,9 +104,46 @@ const me = async (req, res) => {
   }
 };
 
+const updateProfile = async (req, res) => {
+  try {
+    const { name, phone, addresses, lastName } = req.body;
+
+    const user = await User.findByPk(req.user.id);
+
+    if (!user) {
+      return res.status(404).json({ message: "User not found" });
+    }
+
+    if (name !== undefined) user.name = name;
+    if (lastName !== undefined) user.lastName = lastName;
+    if (phone !== undefined) user.phone = phone;
+    if (addresses !== undefined) user.addresses = addresses;
+
+    await user.save();
+
+    res.status(200).json({
+      message: "Profile updated successfully",
+      user: {
+        id: user.id,
+        name: user.name,
+        lastName: user.lastName,
+        email: user.email,
+        phone: user.phone,
+        addresses: user.addresses,
+        createdAt: user.createdAt,
+        updatedAt: user.updatedAt,
+      },
+    });
+  } catch (err) {
+    console.error("Error updating profile:", err);
+    res.status(500).json({ error: err.message });
+  }
+};
+
 module.exports = {
   register,
   login,
   users,
   me,
+  updateProfile,
 };
