@@ -1,6 +1,7 @@
 const bcrypt = require("bcrypt");
 const { User } = require("../models");
 const jwt = require("jsonwebtoken");
+const { v4: uuidv4 } = require("uuid");
 
 const register = async (req, res) => {
   const { name, email, password } = req.body;
@@ -117,7 +118,18 @@ const updateProfile = async (req, res) => {
     if (name !== undefined) user.name = name;
     if (lastName !== undefined) user.lastName = lastName;
     if (phone !== undefined) user.phone = phone;
-    if (addresses !== undefined) user.addresses = addresses;
+    if (addresses !== undefined) {
+      let currentAddresses = user.addresses || [];
+
+      const updatedAddresses = addresses.map((addr) => {
+        if (!addr.id) {
+          return { id: uuidv4(), ...addr };
+        }
+        return addr;
+      });
+
+      user.addresses = updatedAddresses;
+    }
 
     await user.save();
 
@@ -140,10 +152,41 @@ const updateProfile = async (req, res) => {
   }
 };
 
+const updateAddress = async (req, res) => {
+  try {
+    const { addressId } = req.params;
+    const updatedData = req.body;
+
+    const userId = req.user.id;
+    const user = await User.findByPk(userId);
+    if (!user) return res.status(404).json({ message: "User not found" });
+
+    const addresses = user.addresses || [];
+
+    const index = addresses.findIndex(
+      (addr) => String(addr.id) === String(addressId)
+    );
+
+    if (index === -1) {
+      return res.status(404).json({ message: "Address not found" });
+    }
+
+    addresses[index] = { ...addresses[index], ...updatedData };
+    user.addresses = addresses;
+    await user.save();
+
+    return res.json({ message: "Address updated successfully", addresses });
+  } catch (error) {
+    console.error("error ---------", error);
+    return res.status(500).json({ message: "Server error" });
+  }
+};
+
 module.exports = {
   register,
   login,
   users,
   me,
   updateProfile,
+  updateAddress,
 };

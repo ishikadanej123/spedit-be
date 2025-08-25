@@ -9,6 +9,12 @@ const addToCart = async (req, res) => {
     const user = await User.findByPk(userId);
     if (!user) return res.status(404).json({ message: "User not found" });
 
+    if (!quantity || quantity <= 0) {
+      return res
+        .status(400)
+        .json({ message: "Quantity must be greater than 0" });
+    }
+
     const sanityProduct = await sanity.fetch(
       groq`*[_type == "product"].products[coalesce(id, _key) == $pid][0]{
         title,

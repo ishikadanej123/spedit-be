@@ -8,5 +8,10 @@ router.post("/login", userController.login);
 router.get("/users", userController.users);
 router.get("/me", authMiddleware, userController.me);
 router.patch("/updateprofile", authMiddleware, userController.updateProfile);
+router.put(
+  "/updateAddress/:addressId",
+  authMiddleware,
+  userController.updateAddress
+);
 
 module.exports = router;
