@@ -26,6 +26,7 @@ const createorder = async (req, res) => {
       orderId: dbOrder.id,
       razorpayOrderId: razorpayOrder.id,
       razorpayKey: "rzp_test_R8gS9ZJTVh3SPF",
+      productDetails,
     });
   } catch (error) {
     console.error("Error creating order:", error);
@@ -74,7 +75,26 @@ const verifyPayment = async (req, res) => {
   }
 };
 
+const getAllOrders = async (req, res) => {
+  try {
+    const userId = req.user.id;
+    const orders = await Order.findAll({ where: { userId: Number(userId) } });
+
+    return res.status(200).json({
+      msg: "Orders fetched successfully",
+      orders,
+    });
+  } catch (error) {
+    console.error("Error fetching user orders:", error);
+    return res.status(500).json({
+      success: false,
+      msg: "Something went wrong",
+      error,
+    });
+  }
+};
 module.exports = {
   createorder,
   verifyPayment,
+  getAllOrders,
 };
