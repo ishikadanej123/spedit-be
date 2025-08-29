@@ -9,11 +9,11 @@ const addToCart = async (req, res) => {
     const user = await User.findByPk(userId);
     if (!user) return res.status(404).json({ message: "User not found" });
 
-    // if (!quantity || quantity <= 0) {
-    //   return res
-    //     .status(400)
-    //     .json({ message: "Quantity must be greater than 0" });
-    // }
+    if (!quantity || quantity <= 0) {
+      return res
+        .status(400)
+        .json({ message: "Quantity must be greater than 0" });
+    }
 
     const sanityProduct = await sanity.fetch(
       groq`*[_type == "product"].products[coalesce(id, _key) == $pid][0]{
@@ -136,6 +136,42 @@ const getCart = async (req, res) => {
     res.status(500).json({ message: "Error fetching cart" });
   }
 };
+
+const updateCart = async (req, res) => {
+  try {
+    const userId = req.user.id;
+    const { id } = req.params;
+    const { quantity } = req.body;
+
+    if (!quantity || quantity <= 0) {
+      return res
+        .status(400)
+        .json({ message: "Quantity must be greater than 0" });
+    }
+
+    const cartItem = await Cart.findOne({
+      where: { id, userId },
+    });
+
+    if (!cartItem) {
+      return res.status(404).json({ message: "Cart item not found" });
+    }
+
+    cartItem.quantity = quantity;
+    cartItem.total = cartItem.price * quantity;
+    await cartItem.save();
+
+    return res.status(200).json({
+      success: true,
+      message: "Cart item updated successfully",
+      data: cartItem,
+    });
+  } catch (err) {
+    console.error("Error updating cart:", err);
+    res.status(500).json({ error: err.message });
+  }
+};
+
 const removeFromCart = async (req, res) => {
   try {
     const userId = req.user.id;
@@ -168,5 +204,6 @@ const removeFromCart = async (req, res) => {
 module.exports = {
   addToCart,
   getCart,
+  updateCart,
   removeFromCart,
 };
