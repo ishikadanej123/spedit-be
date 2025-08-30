@@ -6,6 +6,7 @@ const userController = require("../controllers/user.controller");
 router.post("/register", userController.register);
 router.post("/login", userController.login);
 router.get("/users", userController.users);
+router.post("/google-login", userController.googleLogin);
 router.get("/me", authMiddleware, userController.me);
 router.patch("/updateprofile", authMiddleware, userController.updateProfile);
 router.put(

@@ -28,7 +28,7 @@ module.exports = {
       },
       password: {
         type: Sequelize.STRING,
-        allowNull: false,
+        allowNull: true,
       },
       addresses: {
         type: Sequelize.JSON,

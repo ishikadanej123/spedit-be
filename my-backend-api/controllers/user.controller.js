@@ -1,13 +1,15 @@
 const bcrypt = require("bcrypt");
-const { User } = require("../models");
+const { User, AuthProvider } = require("../models");
 const jwt = require("jsonwebtoken");
 const { v4: uuidv4 } = require("uuid");
+const { adminAuth } = require("../lib/firebaseAdmin");
 
 const register = async (req, res) => {
   const { name, email, password } = req.body;
-
   try {
-    const existingUser = await User.findOne({ where: { email } });
+    const existingUser = await User.findOne({
+      where: { email },
+    });
     if (existingUser) {
       return res.status(400).json({ message: "User already exists" });
     }
@@ -18,6 +20,13 @@ const register = async (req, res) => {
       name,
       email,
       password: hashedPassword,
+    });
+
+    await AuthProvider.create({
+      provider: "EMAIL",
+      providerId: newUser.id.toString(),
+      password: hashedPassword,
+      userId: newUser.id,
     });
 
     return res.status(201).json({
@@ -44,15 +53,18 @@ const login = async (req, res) => {
     if (!isPasswordValid) {
       return res.status(400).json({ message: "Invalid email or password" });
     }
+
     const token = jwt.sign(
       {
         id: user.id,
         name: user.name,
         email: user.email,
       },
-      process.env.JWT_SECRET
+      process.env.JWT_SECRET,
+      { expiresIn: "7d" }
     );
-    res.status(200).json({
+
+    return res.status(200).json({
       message: "Login successful",
       user: {
         id: user.id,
@@ -63,7 +75,68 @@ const login = async (req, res) => {
     });
   } catch (err) {
     console.error("Error in login:", err);
-    res.status(500).json({ error: err.message });
+    return res.status(500).json({ error: err.message });
+  }
+};
+
+const googleLogin = async (req, res) => {
+  const { token } = req.body;
+  try {
+    const decoded = await adminAuth.verifyIdToken(token);
+    const { email, name, uid } = decoded;
+
+    if (!email) {
+      return res.status(400).json({ message: "Google account has no email" });
+    }
+    let authProvider = await AuthProvider.findOne({
+      where: { provider: "GOOGLE", providerId: uid },
+      include: [{ model: User }],
+    });
+
+    let user;
+
+    if (!authProvider) {
+      user = await User.findOne({ where: { email } });
+
+      if (!user) {
+        user = await User.create({ name, email });
+        await AuthProvider.create({
+          provider: "GOOGLE",
+          providerId: uid,
+          userId: user.id,
+        });
+      } else {
+        await AuthProvider.create({
+          provider: "GOOGLE",
+          providerId: uid,
+          userId: user.id,
+        });
+      }
+    } else {
+      user = authProvider.User;
+    }
+    const appToken = jwt.sign(
+      {
+        id: user.id,
+        name: user.name,
+        email: user.email,
+      },
+      process.env.JWT_SECRET,
+      { expiresIn: "7d" }
+    );
+
+    return res.status(200).json({
+      message: "Google login successful",
+      user: {
+        id: user.id,
+        name: user.name,
+        email: user.email,
+      },
+      token: appToken,
+    });
+  } catch (err) {
+    console.error("Google login error:", err);
+    return res.status(401).json({ message: "Google login failed" });
   }
 };
 
@@ -187,6 +260,7 @@ module.exports = {
   login,
   users,
   me,
+  googleLogin,
   updateProfile,
   updateAddress,
 };
