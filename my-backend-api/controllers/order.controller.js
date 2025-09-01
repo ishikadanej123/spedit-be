@@ -27,6 +27,7 @@ const createorder = async (req, res) => {
       razorpayOrderId: razorpayOrder.id,
       razorpayKey: "rzp_test_R8gS9ZJTVh3SPF",
       productDetails,
+      userDetails,
     });
   } catch (error) {
     console.error("Error creating order:", error);
