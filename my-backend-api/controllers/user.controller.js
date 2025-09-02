@@ -5,7 +5,7 @@ const { v4: uuidv4 } = require("uuid");
 const { adminAuth } = require("../lib/firebaseAdmin");
 
 const register = async (req, res) => {
-  const { name, email, password } = req.body;
+  const { email, password } = req.body;
   try {
     const existingUser = await User.findOne({
       where: { email },
@@ -17,7 +17,6 @@ const register = async (req, res) => {
     const hashedPassword = await bcrypt.hash(password, 10);
 
     const newUser = await User.create({
-      name,
       email,
       password: hashedPassword,
     });
@@ -29,10 +28,18 @@ const register = async (req, res) => {
       userId: newUser.id,
     });
 
+    const token = jwt.sign(
+      {
+        id: newUser.id,
+        email: newUser.email,
+      },
+      process.env.JWT_SECRET
+    );
+
     return res.status(201).json({
       id: newUser.id,
-      name: newUser.name,
       email: newUser.email,
+      token,
     });
   } catch (err) {
     res.status(500).json({ error: err.message });
