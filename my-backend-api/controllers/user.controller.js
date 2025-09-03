@@ -5,7 +5,7 @@ const { v4: uuidv4 } = require("uuid");
 const { adminAuth } = require("../lib/firebaseAdmin");
 
 const register = async (req, res) => {
-  const { email, password } = req.body;
+  const { email, password, role } = req.body;
   try {
     const existingUser = await User.findOne({
       where: { email },
@@ -19,6 +19,7 @@ const register = async (req, res) => {
     const newUser = await User.create({
       email,
       password: hashedPassword,
+      role: role && role === "admin" ? "admin" : "user",
     });
 
     await AuthProvider.create({
@@ -32,6 +33,7 @@ const register = async (req, res) => {
       {
         id: newUser.id,
         email: newUser.email,
+        role: newUser.role,
       },
       process.env.JWT_SECRET
     );
@@ -39,6 +41,7 @@ const register = async (req, res) => {
     return res.status(201).json({
       id: newUser.id,
       email: newUser.email,
+      role: newUser.role,
       token,
     });
   } catch (err) {
@@ -150,7 +153,7 @@ const googleLogin = async (req, res) => {
 const users = async (req, res) => {
   try {
     const users = await User.findAll({
-      attributes: ["id", "name", "email", "createdAt", "updatedAt"],
+      attributes: ["id", "name", "email", "role", "createdAt", "updatedAt"],
     });
     res.status(200).json(users);
   } catch (err) {
