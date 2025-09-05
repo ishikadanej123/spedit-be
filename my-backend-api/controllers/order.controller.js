@@ -125,9 +125,28 @@ const getOrdersByUserId = async (req, res) => {
   }
 };
 
+const getAllUsersOrders = async (req, res) => {
+  try {
+    const orders = await Order.findAll();
+    return res.status(200).json({
+      success: true,
+      msg: "All users' orders fetched successfully",
+      orders,
+    });
+  } catch (error) {
+    console.error("Error fetching all users' orders:", error);
+    return res.status(500).json({
+      success: false,
+      msg: "Something went wrong",
+      error,
+    });
+  }
+};
+
 module.exports = {
   createorder,
   verifyPayment,
   getAllOrders,
   getOrdersByUserId,
+  getAllUsersOrders,
 };
