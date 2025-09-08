@@ -1,6 +1,6 @@
+const { signAppToken } = require("../utils/jwt");
 const bcrypt = require("bcrypt");
 const { User, AuthProvider } = require("../models");
-const jwt = require("jsonwebtoken");
 const { v4: uuidv4 } = require("uuid");
 const { adminAuth } = require("../lib/firebaseAdmin");
 
@@ -29,14 +29,7 @@ const register = async (req, res) => {
       userId: newUser.id,
     });
 
-    const token = jwt.sign(
-      {
-        id: newUser.id,
-        email: newUser.email,
-        role: newUser.role,
-      },
-      process.env.JWT_SECRET
-    );
+    const token = signAppToken(newUser);
 
     return res.status(201).json({
       id: newUser.id,
@@ -64,16 +57,7 @@ const login = async (req, res) => {
       return res.status(400).json({ message: "Invalid email or password" });
     }
 
-    const token = jwt.sign(
-      {
-        id: user.id,
-        name: user.name,
-        email: user.email,
-      },
-      process.env.JWT_SECRET,
-      { expiresIn: "7d" }
-    );
-
+    const token = signAppToken(user);
     return res.status(200).json({
       message: "Login successful",
       user: {
