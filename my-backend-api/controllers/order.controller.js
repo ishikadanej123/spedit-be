@@ -1,5 +1,7 @@
 const razorpay = require("../config/razorpay");
 const { Order } = require("../models");
+const { Cart } = require("../models");
+
 const crypto = require("crypto");
 
 const createorder = async (req, res) => {
@@ -20,6 +22,9 @@ const createorder = async (req, res) => {
       productDetails,
       totalAmount,
     });
+
+    await Cart.destroy({ where: { userId } });
+
     return res.status(201).json({
       success: true,
       msg: "Order created successfully",
