@@ -130,6 +130,36 @@ const getOrdersByUserId = async (req, res) => {
   }
 };
 
+const getOrderById = async (req, res) => {
+  try {
+    const { orderId } = req.params;
+
+    const order = await Order.findOne({
+      where: { id: Number(orderId) },
+    });
+
+    if (!order) {
+      return res.status(404).json({
+        success: false,
+        msg: "Order not found",
+      });
+    }
+
+    return res.status(200).json({
+      success: true,
+      msg: "Order fetched successfully",
+      order,
+    });
+  } catch (error) {
+    console.error("Error fetching order by ID:", error);
+    return res.status(500).json({
+      success: false,
+      msg: "Something went wrong",
+      error,
+    });
+  }
+};
+
 const getAllUsersOrders = async (req, res) => {
   try {
     const orders = await Order.findAll();
@@ -154,4 +184,5 @@ module.exports = {
   getAllOrders,
   getOrdersByUserId,
   getAllUsersOrders,
+  getOrderById,
 };

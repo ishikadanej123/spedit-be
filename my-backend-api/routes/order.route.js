@@ -8,6 +8,7 @@ router.post("/create-order", authMiddleware, orderController.createorder);
 router.post("/verify-payment", orderController.verifyPayment);
 router.get("/getorders", authMiddleware, orderController.getAllOrders);
 router.get("/all-orders", isAdmin, orderController.getAllUsersOrders);
-router.get("/:userId", orderController.getOrdersByUserId);
+// router.get("/:userId", orderController.getOrdersByUserId);
+router.get("/:orderId", orderController.getOrderById);
 
 module.exports = router;
