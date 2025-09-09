@@ -9,6 +9,7 @@ const cartroutes = require("./routes/cart.route");
 const wishlistroutes = require("./routes/wishlist.route");
 const recentviewsroutes = require("./routes/recentview.route");
 const orderrouter = require("./routes/order.route");
+const statsRouter = require("./routes/stats.route");
 
 const PORT = process.env.APP_PORT || 4000;
 app.use(cors());
@@ -39,3 +40,4 @@ app.use("/cart", cartroutes);
 app.use("/wishlist", wishlistroutes);
 app.use("/recent-view", recentviewsroutes);
 app.use("/order", orderrouter);
+app.use("/stats", statsRouter);

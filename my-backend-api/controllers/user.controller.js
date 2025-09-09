@@ -137,7 +137,7 @@ const googleLogin = async (req, res) => {
 const users = async (req, res) => {
   try {
     const users = await User.findAll({
-      attributes: ["id", "name", "email", "role", "createdAt", "updatedAt"],
+      attributes: { exclude: ["password"] },
     });
     res.status(200).json(users);
   } catch (err) {
