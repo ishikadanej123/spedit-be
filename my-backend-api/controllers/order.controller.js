@@ -23,8 +23,6 @@ const createorder = async (req, res) => {
       totalAmount,
     });
 
-    await Cart.destroy({ where: { userId } });
-
     return res.status(201).json({
       success: true,
       msg: "Order created successfully",
@@ -49,6 +47,7 @@ const verifyPayment = async (req, res) => {
       razorpay_payment_id,
       razorpay_signature,
       orderId,
+      userId,
     } = req.body;
 
     const generatedSignature = crypto
@@ -66,6 +65,8 @@ const verifyPayment = async (req, res) => {
       { paymentStatus: "Paid", razorpayPaymentId: razorpay_payment_id },
       { where: { id: orderId } }
     );
+
+    await Cart.destroy({ where: { userId } });
 
     return res.status(200).json({
       success: true,
