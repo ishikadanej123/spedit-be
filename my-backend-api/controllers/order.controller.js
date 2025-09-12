@@ -1,4 +1,5 @@
 const razorpay = require("../config/razorpay");
+const { sendSlackNotification } = require("../lib/helper");
 const { Order } = require("../models");
 const { Cart } = require("../models");
 
@@ -25,6 +26,9 @@ const createorder = async (req, res) => {
 
     await Cart.destroy({ where: { userId } });
 
+    await sendSlackNotification(
+      `🛒 New Order Created!\nOrder ID: ${dbOrder.id}\nUser: ${userDetails.name}\nAmount: ₹${totalAmount}`
+    );
     return res.status(201).json({
       success: true,
       msg: "Order created successfully",
@@ -49,6 +53,7 @@ const verifyPayment = async (req, res) => {
       razorpay_payment_id,
       razorpay_signature,
       orderId,
+      userId,
     } = req.body;
 
     const generatedSignature = crypto
@@ -66,6 +71,11 @@ const verifyPayment = async (req, res) => {
       { paymentStatus: "Paid", razorpayPaymentId: razorpay_payment_id },
       { where: { id: orderId } }
     );
+
+    await sendSlackNotification(
+      `✅ Payment Verified!\nOrder ID: ${orderId}\nPayment ID: ${razorpay_payment_id}`
+    );
+    await Cart.destroy({ where: { userId } });
 
     return res.status(200).json({
       success: true,

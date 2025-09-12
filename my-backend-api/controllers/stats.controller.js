@@ -84,27 +84,9 @@ const getStatsOverview = async (req, res) => {
 
     // --------- Recent orders ----------
     const recentOrdersRaw = await Order.findAll({
-      attributes: ["id", "userId", "totalAmount", "createdAt"],
-      include: [
-        {
-          model: User,
-          attributes: ["id", "name", "email", "role"],
-          required: true,
-        },
-      ],
       order: [["createdAt", "DESC"]],
       limit: 10,
     });
-
-    const recentOrders = recentOrdersRaw.map((o) => ({
-      orderId: o.id,
-      userId: o.userId,
-      name: o.User?.name || "Unknown",
-      email: o.User?.email || "",
-      role: o.User?.role || "",
-      totalAmount: Number(o.totalAmount),
-      createdAt: o.createdAt,
-    }));
 
     // --------- Response ----------
     return res.status(200).json({
@@ -119,7 +101,7 @@ const getStatsOverview = async (req, res) => {
         revenueLast12Months, // [{ month: "2025-01", label: "Jan 2025", revenue: 1234 }, ...]
       },
       tables: {
-        recentOrders, // [{ userId, name, email, role, ordersCount, totalSpent }, ...]
+        recentOrdersRaw, // [{ userId, name, email, role, ordersCount, totalSpent }, ...]
       },
       meta: {
         asOf: new Date().toISOString(),
