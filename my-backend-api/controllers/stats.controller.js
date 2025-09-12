@@ -6,9 +6,7 @@ const getStatsOverview = async (req, res) => {
   try {
     // --------- KPI cards ----------
     const totalOrders = await Order.count();
-
     const totalIncome = Number((await Order.sum("totalAmount")) || 0);
-
     const totalUsers = await User.count({
       where: { role: { [Op.ne]: "admin" } },
     });
@@ -26,8 +24,95 @@ const getStatsOverview = async (req, res) => {
       })) || 0
     );
 
+    // --------- Orders by Postcode ----------
+    let ordersByPostcode = [];
+
+    try {
+      // First, let's examine the actual structure of one record
+      const sampleOrder = await Order.findOne({
+        attributes: ["userDetails"],
+        raw: true,
+      });
+
+      console.log("Sample userDetails:", sampleOrder.userDetails);
+
+      // Process all orders to extract postcodes
+      const allOrders = await Order.findAll({
+        attributes: ["id", "userDetails"],
+        raw: true,
+      });
+
+      const postcodeCounts = {};
+
+      allOrders.forEach((order) => {
+        try {
+          let addressData;
+
+          // Parse the shippingAddress field
+          if (typeof order.userDetails === "string") {
+            addressData = JSON.parse(order.userDetails);
+          } else {
+            addressData = order.userDetails;
+          }
+
+          // Debug: log the structure to understand it better
+          console.log(
+            "Address data structure:",
+            JSON.stringify(addressData, null, 2)
+          );
+
+          // Extract postcode based on the structure from your image
+          // The image shows: addresses: { city: "Surat", postcode: "125005" }
+          let postcode = "UNKNOWN";
+
+          if (addressData.addresses && addressData.addresses.postcode) {
+            postcode = addressData.addresses.postcode;
+          } else if (addressData.address && addressData.address.postcode) {
+            postcode = addressData.address.postcode;
+          } else if (addressData.postcode) {
+            postcode = addressData.postcode;
+          } else if (addressData.addresses) {
+            // Try to handle case where addresses might be a string that needs parsing
+            try {
+              const parsedAddresses =
+                typeof addressData.addresses === "string"
+                  ? JSON.parse(addressData.addresses)
+                  : addressData.addresses;
+
+              if (parsedAddresses.postcode) {
+                postcode = parsedAddresses.postcode;
+              }
+            } catch (e) {
+              console.log("Could not parse addresses field as JSON");
+            }
+          }
+
+          // Count by postcode
+          if (postcodeCounts[postcode]) {
+            postcodeCounts[postcode]++;
+          } else {
+            postcodeCounts[postcode] = 1;
+          }
+        } catch (error) {
+          console.error("Error processing order:", order.id, error);
+          if (postcodeCounts["ERROR_PROCESSING"]) {
+            postcodeCounts["ERROR_PROCESSING"]++;
+          } else {
+            postcodeCounts["ERROR_PROCESSING"] = 1;
+          }
+        }
+      });
+
+      ordersByPostcode = Object.entries(postcodeCounts)
+        .map(([postcode, count]) => ({ postcode, count }))
+        .sort((a, b) => b.count - a.count)
+        .slice(0, 5);
+    } catch (error) {
+      console.error("Error in postcode processing:", error);
+      ordersByPostcode = [{ postcode: "ERROsR_PROCESSING", count: 0 }];
+    }
+
     // --------- Revenue (last 12 months) ----------
-    // Build [YYYY-MM] keys for the last 12 months (inclusive of current month)
     const months = [];
     for (let i = 11; i >= 0; i--) {
       const d = new Date(now.getFullYear(), now.getMonth() - i, 1);
@@ -45,17 +130,15 @@ const getStatsOverview = async (req, res) => {
     );
     const endRange = new Date(now.getFullYear(), now.getMonth() + 1, 1);
 
-    const dialect = sequelize.getDialect(); // 'postgres' | 'mysql' | 'mariadb' | ...
+    const dialect = sequelize.getDialect();
     let monthSelect;
     if (dialect === "postgres") {
-      // e.g. 2025-09 -> to_char(date_trunc('month', "createdAt"), 'YYYY-MM')
       monthSelect = fn(
         "to_char",
         fn("date_trunc", "month", col("createdAt")),
         "YYYY-MM"
       );
     } else {
-      // MySQL/MariaDB: DATE_FORMAT(createdAt, '%Y-%m')
       monthSelect = fn("DATE_FORMAT", col("createdAt"), "%Y-%m");
     }
 
@@ -77,7 +160,7 @@ const getStatsOverview = async (req, res) => {
       revenueRows.map((r) => [r.ym, Number(r.revenue)])
     );
     const revenueLast12Months = months.map(({ key, date }) => ({
-      month: key, // "YYYY-MM"
+      month: key,
       label: date.toLocaleString("en-US", { month: "short", year: "numeric" }),
       revenue: revenueMap.get(key) || 0,
     }));
@@ -95,13 +178,18 @@ const getStatsOverview = async (req, res) => {
         totalUsers,
         totalOrders,
         totalIncome,
-        monthlyIncome, // current month
+        monthlyIncome,
       },
       charts: {
-        revenueLast12Months, // [{ month: "2025-01", label: "Jan 2025", revenue: 1234 }, ...]
+        revenueLast12Months,
       },
       tables: {
-        recentOrdersRaw, // [{ userId, name, email, role, ordersCount, totalSpent }, ...]
+        recentOrdersRaw,
+      },
+      // Postcode statistics
+      postcodeStats: {
+        totalOrders,
+        ordersByPostcode,
       },
       meta: {
         asOf: new Date().toISOString(),
