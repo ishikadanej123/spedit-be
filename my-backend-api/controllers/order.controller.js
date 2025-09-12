@@ -26,9 +26,6 @@ const createorder = async (req, res) => {
 
     await Cart.destroy({ where: { userId } });
 
-    await sendSlackNotification(
-      `🛒 New Order Created!\nOrder ID: ${dbOrder.id}\nUser: ${userDetails.name}\nAmount: ₹${totalAmount}`
-    );
     return res.status(201).json({
       success: true,
       msg: "Order created successfully",
@@ -72,9 +69,23 @@ const verifyPayment = async (req, res) => {
       { where: { id: orderId } }
     );
 
-    await sendSlackNotification(
-      `✅ Payment Verified!\nOrder ID: ${orderId}\nPayment ID: ${razorpay_payment_id}`
-    );
+    const order = await Order.findOne({ where: { id: orderId } });
+    console.log("orderproduct>>>", order.productDetails);
+    const productDetailsArray = Array.isArray(order.productDetails)
+      ? order.productDetails
+      : JSON.parse(order.productDetails);
+
+    const productList = productDetailsArray
+      .map((p) => `${p.title} × ${p.quantity}`)
+      .join("\n");
+
+    const message = `🎉 *New Order Confirmed!* 🎉
+    👤 *Customer:* ${order.userDetails.name}
+    📦 *Products Ordered:*\n${productList}
+    💰 *Total Amount:* ₹${order.totalAmount}
+    ✅ Payment Status: Confirmed 🚀`;
+
+    await sendSlackNotification(message);
     await Cart.destroy({ where: { userId } });
 
     return res.status(200).json({

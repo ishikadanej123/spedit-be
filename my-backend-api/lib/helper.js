@@ -1,11 +1,9 @@
 const { WebClient } = require("@slack/web-api");
 
-async function sendSlackNotification(message, isLeave = false) {
+async function sendSlackNotification(message) {
   const slackClient = new WebClient(process.env.SLACK_BOT_TOKEN);
 
-  const slackChannelId = isLeave
-    ? process.env.SLACK_LEAVE_CHANNEL_ID
-    : process.env.SLACK_CHANNEL_ID;
+  const slackChannelId = process.env.SLACK_CHANNEL_ID;
 
   try {
     await slackClient.chat.postMessage({
