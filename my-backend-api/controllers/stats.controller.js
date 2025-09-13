@@ -34,8 +34,6 @@ const getStatsOverview = async (req, res) => {
         raw: true,
       });
 
-      console.log("Sample userDetails:", sampleOrder.userDetails);
-
       // Process all orders to extract postcodes
       const allOrders = await Order.findAll({
         attributes: ["id", "userDetails"],
@@ -56,10 +54,10 @@ const getStatsOverview = async (req, res) => {
           }
 
           // Debug: log the structure to understand it better
-          console.log(
-            "Address data structure:",
-            JSON.stringify(addressData, null, 2)
-          );
+          // console.log(
+          //   "Address data structure:",
+          //   JSON.stringify(addressData, null, 2)
+          // );
 
           // Extract postcode based on the structure from your image
           // The image shows: addresses: { city: "Surat", postcode: "125005" }

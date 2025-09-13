@@ -11,5 +11,6 @@ router.get("/all-orders", isAdmin, orderController.getAllUsersOrders);
 // router.get("/:userId", orderController.getOrdersByUserId);
 router.get("/pincode", orderController.getOrdersByPincode);
 router.get("/:orderId", orderController.getOrderById);
+router.put("/orderstatus/:orderId", isAdmin, orderController.updateOrderStatus);
 
 module.exports = router;

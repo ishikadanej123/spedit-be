@@ -37,7 +37,6 @@ const addToWishlist = async (req, res) => {
     const product = sanityProduct[0];
     const actualPriceRaw = product.price ?? product.originalPrice;
     const actualPrice = Number(actualPriceRaw);
-    console.log("actualPrice---->> ", actualPrice);
     if (!Number.isFinite(actualPrice) || actualPrice <= 0) {
       return res
         .status(400)

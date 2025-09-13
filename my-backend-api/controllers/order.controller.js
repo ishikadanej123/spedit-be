@@ -71,7 +71,7 @@ const verifyPayment = async (req, res) => {
     );
 
     const order = await Order.findOne({ where: { id: orderId } });
-    console.log("orderproduct>>>", order.productDetails);
+
     const productDetailsArray = Array.isArray(order.productDetails)
       ? order.productDetails
       : JSON.parse(order.productDetails);
@@ -230,6 +230,25 @@ const getAllUsersOrders = async (req, res) => {
   }
 };
 
+const updateOrderStatus = async (req, res) => {
+  const { orderId } = req.params;
+  const { orderStatus } = req.body;
+  try {
+    const order = await Order.findByPk(orderId);
+
+    if (!order) {
+      return res.status(404).json({ message: "Order not found" });
+    }
+
+    order.orderStatus = orderStatus;
+    await order.save();
+    return res.json({ message: "Order status updated", order });
+  } catch (error) {
+    console.error(error);
+    return res.status(500).json({ message: "Server error" });
+  }
+};
+
 module.exports = {
   createorder,
   verifyPayment,
@@ -238,4 +257,5 @@ module.exports = {
   getAllUsersOrders,
   getOrderById,
   getOrdersByPincode,
+  updateOrderStatus,
 };
