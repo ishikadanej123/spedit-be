@@ -2,6 +2,7 @@ const razorpay = require("../config/razorpay");
 const { sendSlackNotification } = require("../lib/helper");
 const { Order } = require("../models");
 const { Cart } = require("../models");
+const { literal } = require("sequelize");
 
 const crypto = require("crypto");
 
@@ -181,6 +182,36 @@ const getOrderById = async (req, res) => {
   }
 };
 
+const getOrdersByPincode = async (req, res) => {
+  try {
+    const { pincode } = req.query;
+
+    const orders = await Order.findAll({
+      where: literal(`"userDetails"->'addresses'->>'postcode' = '${pincode}'`),
+    });
+
+    if (!orders || orders.length === 0) {
+      return res.status(404).json({
+        success: false,
+        msg: `No orders found for pincode ${pincode}`,
+      });
+    }
+
+    return res.status(200).json({
+      success: true,
+      msg: `Orders fetched successfully for pincode ${pincode}`,
+      orders,
+    });
+  } catch (error) {
+    console.error("Error fetching orders by pincode:", error);
+    return res.status(500).json({
+      success: false,
+      msg: "Something went wrong",
+      error,
+    });
+  }
+};
+
 const getAllUsersOrders = async (req, res) => {
   try {
     const orders = await Order.findAll();
@@ -206,4 +237,5 @@ module.exports = {
   getOrdersByUserId,
   getAllUsersOrders,
   getOrderById,
+  getOrdersByPincode,
 };

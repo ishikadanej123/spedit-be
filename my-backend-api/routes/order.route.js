@@ -9,6 +9,7 @@ router.post("/verify-payment", orderController.verifyPayment);
 router.get("/getorders", authMiddleware, orderController.getAllOrders);
 router.get("/all-orders", isAdmin, orderController.getAllUsersOrders);
 // router.get("/:userId", orderController.getOrdersByUserId);
+router.get("/pincode", orderController.getOrdersByPincode);
 router.get("/:orderId", orderController.getOrderById);
 
 module.exports = router;
