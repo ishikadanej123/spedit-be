@@ -25,8 +25,6 @@ const createorder = async (req, res) => {
       totalAmount,
     });
 
-    await Cart.destroy({ where: { userId } });
-
     return res.status(201).json({
       success: true,
       msg: "Order created successfully",
@@ -59,7 +57,9 @@ const verifyPayment = async (req, res) => {
       .update(razorpay_order_id + "|" + razorpay_payment_id)
       .digest("hex");
 
-    if (generatedSignature !== razorpay_signature) {
+    const isPaymentValid = generatedSignature === razorpay_signature;
+
+    if (!isPaymentValid) {
       return res
         .status(400)
         .json({ success: false, msg: "Payment verification failed" });
