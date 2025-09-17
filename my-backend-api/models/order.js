@@ -8,6 +8,10 @@ module.exports = (sequelize, DataTypes) => {
         foreignKey: "userId",
         onDelete: "CASCADE",
       });
+      Order.belongsTo(models.Coupon, {
+        foreignKey: "couponId",
+        onDelete: "SET NULL",
+      });
     }
   }
 
@@ -22,6 +26,16 @@ module.exports = (sequelize, DataTypes) => {
         },
         onUpdate: "CASCADE",
         onDelete: "CASCADE",
+      },
+      couponId: {
+        type: DataTypes.INTEGER,
+        allowNull: true,
+        references: {
+          model: "Coupons",
+          key: "id",
+        },
+        onUpdate: "CASCADE",
+        onDelete: "SET NULL",
       },
       userDetails: {
         type: DataTypes.JSON,
