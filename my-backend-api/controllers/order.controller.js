@@ -23,6 +23,7 @@ const createorder = async (req, res) => {
       userDetails,
       productDetails,
       totalAmount,
+      paymentStatus: "processing",
     });
 
     return res.status(201).json({
@@ -60,13 +61,18 @@ const verifyPayment = async (req, res) => {
     const isPaymentValid = generatedSignature === razorpay_signature;
 
     if (!isPaymentValid) {
+      await Order.update(
+        { paymentStatus: "failed" },
+        { where: { id: orderId } }
+      );
+
       return res
         .status(400)
         .json({ success: false, msg: "Payment verification failed" });
     }
 
     await Order.update(
-      { paymentStatus: "Paid", razorpayPaymentId: razorpay_payment_id },
+      { paymentStatus: "completed", razorpayPaymentId: razorpay_payment_id },
       { where: { id: orderId } }
     );
 
@@ -97,6 +103,13 @@ const verifyPayment = async (req, res) => {
     });
   } catch (error) {
     console.error("Error verifying payment:", error);
+
+    if (req.body.orderId) {
+      await Order.update(
+        { paymentStatus: "failed" },
+        { where: { id: req.body.orderId } }
+      );
+    }
     return res
       .status(500)
       .json({ success: false, msg: "Something went wrong", error });
