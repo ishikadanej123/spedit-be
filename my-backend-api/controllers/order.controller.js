@@ -119,7 +119,9 @@ const verifyPayment = async (req, res) => {
 const getAllOrders = async (req, res) => {
   try {
     const userId = req.user.id;
-    const orders = await Order.findAll({ where: { userId: Number(userId) } });
+    const orders = await Order.findAll({
+      where: { userId: Number(userId), paymentStatus: "completed" },
+    });
 
     return res.status(200).json({
       msg: "Orders fetched successfully",
@@ -227,7 +229,9 @@ const getOrdersByPincode = async (req, res) => {
 
 const getAllUsersOrders = async (req, res) => {
   try {
-    const orders = await Order.findAll();
+    const orders = await Order.findAll({
+      where: { paymentStatus: "completed" },
+    });
     return res.status(200).json({
       success: true,
       msg: "All users' orders fetched successfully",

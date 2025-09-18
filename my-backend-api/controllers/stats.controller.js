@@ -165,6 +165,7 @@ const getStatsOverview = async (req, res) => {
 
     // --------- Recent orders ----------
     const recentOrdersRaw = await Order.findAll({
+      where: { paymentStatus: "completed" },
       order: [["createdAt", "DESC"]],
       limit: 10,
     });
