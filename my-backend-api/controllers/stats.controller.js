@@ -5,7 +5,9 @@ const { Op, fn, col, literal } = require("sequelize");
 const getStatsOverview = async (req, res) => {
   try {
     // --------- KPI cards ----------
-    const totalOrders = await Order.count();
+    const totalOrders = await Order.count({
+      where: { paymentStatus: "completed" },
+    });
     const totalIncome = Number((await Order.sum("totalAmount")) || 0);
     const totalUsers = await User.count({
       where: { role: { [Op.ne]: "admin" } },
@@ -31,12 +33,14 @@ const getStatsOverview = async (req, res) => {
       // First, let's examine the actual structure of one record
       const sampleOrder = await Order.findOne({
         attributes: ["userDetails"],
+        where: { paymentStatus: "completed" },
         raw: true,
       });
 
       // Process all orders to extract postcodes
       const allOrders = await Order.findAll({
         attributes: ["id", "userDetails"],
+        where: { paymentStatus: "completed" },
         raw: true,
       });
 
