@@ -110,8 +110,7 @@ const verifyPayment = async (req, res) => {
     const message = `🎉 *New Order Confirmed!* 🎉
     👤 *Customer:* ${order.userDetails.name}
     📦 *Products Ordered:*\n${productList}
-    💰 *Total Amount:* ₹${order.totalAmount}
-    ✅ Payment Status: Confirmed 🚀`;
+    💰 *Total Amount:* ₹${order.totalAmount}`;
 
     await sendSlackNotification(message);
     await Cart.destroy({ where: { userId } });
