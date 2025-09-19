@@ -7,8 +7,16 @@ const crypto = require("crypto");
 
 const createorder = async (req, res) => {
   try {
-    const { userId, userDetails, productDetails, totalAmount, appliedCoupon } =
-      req.body;
+    const {
+      userId,
+      userDetails,
+      productDetails,
+      totalAmount,
+      appliedCoupon,
+      finalTotal,
+      shippingCharge,
+      couponDiscount,
+    } = req.body;
 
     const options = {
       amount: totalAmount * 100,
@@ -23,6 +31,9 @@ const createorder = async (req, res) => {
       userDetails,
       productDetails,
       totalAmount,
+      finalTotal,
+      shippingCharge,
+      couponDiscount,
       paymentStatus: "processing",
       couponId: appliedCoupon || null,
     });
@@ -37,9 +48,12 @@ const createorder = async (req, res) => {
       orderId: dbOrder.id,
       razorpayOrderId: razorpayOrder.id,
       razorpayKey: "rzp_test_R8gS9ZJTVh3SPF",
-      productDetails,
       userDetails,
+      productDetails,
       totalAmount,
+      finalTotal,
+      shippingCharge,
+      couponDiscount,
       appliedCoupon: orderWithCoupon.Coupon || null,
     });
   } catch (error) {
