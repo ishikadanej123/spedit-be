@@ -1,14 +1,14 @@
 const razorpay = require("../config/razorpay");
 const { sendSlackNotification } = require("../lib/helper");
-const { Order } = require("../models");
-const { Cart } = require("../models");
+const { Cart, Coupon, Order } = require("../models");
 const { literal } = require("sequelize");
 
 const crypto = require("crypto");
 
 const createorder = async (req, res) => {
   try {
-    const { userId, userDetails, productDetails, totalAmount } = req.body;
+    const { userId, userDetails, productDetails, totalAmount, appliedCoupon } =
+      req.body;
 
     const options = {
       amount: totalAmount * 100,
@@ -24,6 +24,11 @@ const createorder = async (req, res) => {
       productDetails,
       totalAmount,
       paymentStatus: "processing",
+      couponId: appliedCoupon || null,
+    });
+
+    const orderWithCoupon = await Order.findByPk(dbOrder.id, {
+      include: [{ model: Coupon, as: "Coupon" }],
     });
 
     return res.status(201).json({
@@ -34,6 +39,8 @@ const createorder = async (req, res) => {
       razorpayKey: "rzp_test_R8gS9ZJTVh3SPF",
       productDetails,
       userDetails,
+      totalAmount,
+      appliedCoupon: orderWithCoupon.Coupon || null,
     });
   } catch (error) {
     console.error("Error creating order:", error);
