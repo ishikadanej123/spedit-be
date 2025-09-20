@@ -8,7 +8,7 @@ const getStatsOverview = async (req, res) => {
     const totalOrders = await Order.count({
       where: { paymentStatus: "completed" },
     });
-    const totalIncome = Number((await Order.sum("totalAmount")) || 0);
+    const totalIncome = Number((await Order.sum("finalTotal")) || 0);
     const totalUsers = await User.count({
       where: { role: { [Op.ne]: "admin" } },
     });
@@ -19,7 +19,7 @@ const getStatsOverview = async (req, res) => {
     const endOfMonth = new Date(now.getFullYear(), now.getMonth() + 1, 1);
 
     const monthlyIncome = Number(
-      (await Order.sum("totalAmount", {
+      (await Order.sum("finalTotal", {
         where: {
           createdAt: { [Op.gte]: startOfMonth, [Op.lt]: endOfMonth },
         },
@@ -147,7 +147,7 @@ const getStatsOverview = async (req, res) => {
     const revenueRows = await Order.findAll({
       attributes: [
         [monthSelect, "ym"],
-        [fn("COALESCE", fn("SUM", col("totalAmount")), 0), "revenue"],
+        [fn("COALESCE", fn("SUM", col("finalTotal")), 0), "revenue"],
       ],
       where: {
         createdAt: { [Op.gte]: startRange, [Op.lt]: endRange },
